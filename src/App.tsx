@@ -1,11 +1,30 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from "react";
+import logo from "./logo.svg";
+import "./App.css";
 
 function App() {
+  useEffect(() => {
+    const eventSource = new EventSource("http://localhost:3000/sse", {
+      withCredentials: true,
+    });
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "message") {
+        window.alert(data.message);
+      } else if (data.type === "close") {
+        window.alert("연결이 종료되었습니다.");
+        eventSource.close();
+      }
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
   return (
     <div className="App">
       <header className="App-header">
+        <button>SSE 끄기</button>
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.tsx</code> and save to reload.
